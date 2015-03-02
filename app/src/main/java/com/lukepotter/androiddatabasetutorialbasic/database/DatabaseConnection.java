@@ -1,8 +1,15 @@
 package com.lukepotter.androiddatabasetutorialbasic.database;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import com.lukepotter.androiddatabasetutorialbasic.model.BlogPost;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * DatabaseConnection.java
@@ -64,5 +71,37 @@ public class DatabaseConnection extends SQLiteOpenHelper {
             database.execSQL(DROP_BLOGPOSTS_TABLE);
             onCreate(database);
         }
+    }
+
+    public void addBlogPost(BlogPost blogPost) {
+        SQLiteDatabase database = getWritableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(KEY_ID, blogPost.getId());
+        contentValues.put(KEY_TITLE, blogPost.getTitle());
+
+        database.insert(TABLE_BLOGPOSTS, null, contentValues);
+        database.close();
+    }
+
+    public List<BlogPost> getAllBlogPosts() {
+
+        List<BlogPost> blogPosts = new ArrayList<>();
+
+        SQLiteDatabase database = getReadableDatabase();
+        Cursor cursor = database.query(TABLE_BLOGPOSTS, null, null, null, null, null, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                blogPosts.add(new BlogPost(
+                        Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID))),
+                        cursor.getString(cursor.getColumnIndex(KEY_TITLE))));
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        database.close();
+
+        return blogPosts;
     }
 }
