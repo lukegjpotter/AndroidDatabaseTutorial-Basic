@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Android Database Tutorial Basic</string>
 
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="enter_blog_post_title">Enter Blog Post Title</string>
+    <string name="button_add">Add</string>
+    <string name="button_delete">Delete</string>
 </resources>

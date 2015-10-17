@@ -35,25 +35,34 @@ public class DatabaseConnection extends SQLiteOpenHelper {
     private static final String KEY_TITLE = "title";
     // Singleton Instance.
     private static DatabaseConnection ourInstance;
+    // The ID of the next row number, used for Insertions.
+    private static int NEXT_ROW_ID_NUMBER;
 
     /**
      * Simple Constructor for Database Connection
      */
     private DatabaseConnection(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        setupNextRowIdNumber();
     }
 
     /**
      * Allows retrieval of the Singleton Instance,
-     * in the app we'll call DatabaseConnection.getInstance(this) to get the instance.
+     * in the app we'll call DatabaseConnection.getInstance(getApplicationContext()) to get the
+     * instance.
      */
-    public static DatabaseConnection getInstance(Context context) {
+    public static synchronized DatabaseConnection getInstance(Context context) {
         // Initialise the instance if it's null.
         if (ourInstance == null) ourInstance = new DatabaseConnection(context);
 
         return ourInstance;
     }
 
+    /**
+     * Used by the Android System to Create the Database Initially.
+     *
+     * @param database The Database Instance from Android System.
+     */
     @Override
     public void onCreate(SQLiteDatabase database) {
 
@@ -63,6 +72,13 @@ public class DatabaseConnection extends SQLiteOpenHelper {
         database.execSQL(CREATE_BLOGPOSTS_TABLE);
     }
 
+    /**
+     * Used by the Android System to Upgrade the database version.
+     *
+     * @param database   The Database Instance from Android System.
+     * @param oldVersion The Old version of the Database.
+     * @param newVersion The New version of the Database.
+     */
     @Override
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
 
@@ -76,18 +92,33 @@ public class DatabaseConnection extends SQLiteOpenHelper {
         }
     }
 
+    /**
+     * Adds a new BlogPost to the Database.
+     * It performs a check to see if the BlogPost is unique.
+     *
+     * @param blogPost The BlogPost to add.
+     */
     public void addBlogPost(BlogPost blogPost) {
+
+        // Abandon if new BlogPost is a duplicate.
+        if (isBlogPostInDatabase(blogPost)) return;
 
         SQLiteDatabase database = getWritableDatabase();
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(KEY_ID, blogPost.getId());
+        contentValues.put(KEY_ID, NEXT_ROW_ID_NUMBER);
         contentValues.put(KEY_TITLE, blogPost.getTitle());
 
         database.insert(TABLE_BLOGPOSTS, null, contentValues);
+        NEXT_ROW_ID_NUMBER++;
         database.close();
     }
 
+    /**
+     * Gets all the BlogPost objects that are in the Database.
+     *
+     * @return All the BlogPosts in the Database.
+     */
     public List<BlogPost> getAllBlogPosts() {
 
         List<BlogPost> blogPosts = new ArrayList<>();
@@ -109,6 +140,14 @@ public class DatabaseConnection extends SQLiteOpenHelper {
         return blogPosts;
     }
 
+    /**
+     * Locates a BlogPost using it's Id.
+     * Useful for ListView's OnClickListener, when dealing with positions that correspond to the
+     * indices in the database, e.g. FragmentListView in a DrawerPattern.
+     *
+     * @param id The Id of the BlogPost to search the Database for.
+     * @return The BlogPost corresponding to the Id
+     */
     public BlogPost getBlogPost(int id) {
 
         BlogPost blogPost = null;
@@ -133,6 +172,11 @@ public class DatabaseConnection extends SQLiteOpenHelper {
         return blogPost;
     }
 
+    /**
+     * Updates the BlogPost in the Database. Uses the BlogPost's Id to do the lookup.
+     *
+     * @param updatedBlogPost The BlogPost to update.
+     */
     public void updateBlogPost(BlogPost updatedBlogPost) {
 
         SQLiteDatabase database = getWritableDatabase();
@@ -149,7 +193,21 @@ public class DatabaseConnection extends SQLiteOpenHelper {
         database.close();
     }
 
+    /**
+     * Deletes a BlogPost from the Database.
+     * It checks if the BlogPost exists in the Database before proceeding.
+     *
+     * @param blogPostToDelete The BlogPost to delete.
+     */
     public void deleteBlogPost(BlogPost blogPostToDelete) {
+
+        // If the Id is not set, discover the ID;
+        if (blogPostToDelete.getId() == -1) {
+            int blogPostId = findBlogPostRowId(blogPostToDelete);
+
+            if (blogPostId == -1) return; // Exit deletion process, as BlogPost is not in Database.
+            else blogPostToDelete.setId(blogPostId); // Continue with deletion of existing BlogPost.
+        }
 
         String whereClause = KEY_ID + "=?";
         String[] whereArgs = new String[]{String.valueOf(blogPostToDelete.getId())};
@@ -160,6 +218,12 @@ public class DatabaseConnection extends SQLiteOpenHelper {
         database.close();
     }
 
+    /**
+     * Gets the number of BlogPosts in the database.
+     * Useful for Array sizing.
+     *
+     * @return The number of BlogPosts in the database.
+     */
     public int getBlogPostsCount() {
 
         String[] columns = new String[]{KEY_ID};
@@ -172,5 +236,60 @@ public class DatabaseConnection extends SQLiteOpenHelper {
         database.close();
 
         return numberOfBlogPosts;
+    }
+
+    /**
+     * Searches the database for the BlogPost.
+     * This Search uses the BlogPost's equals() method.
+     *
+     * @param blogPost The BlogPost to search for.
+     * @return True, if the BlogPost is in the database.
+     * False, if the BlogPost is not in the database.
+     */
+    public boolean isBlogPostInDatabase(BlogPost blogPost) {
+
+        List<BlogPost> blogPosts = getAllBlogPosts();
+
+        for (BlogPost blogPostInList : blogPosts) {
+            if (blogPostInList.equals(blogPost))
+                return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Finds the Row Id of the BlogPost in the database.
+     * This Search uses the BlogPost's equals() method.
+     *
+     * @param blogPost The BlogPost to search for.
+     * @return The Row Id of the BlogPost, if it exists.
+     * -1, if the BlogPost does not exist.
+     */
+    public int findBlogPostRowId(BlogPost blogPost) {
+
+        List<BlogPost> blogPosts = getAllBlogPosts();
+
+        for (BlogPost blogPostInList : blogPosts) {
+            if (blogPostInList.equals(blogPost))
+                return blogPostInList.getId();
+        }
+
+        return -1;
+    }
+
+    /**
+     * Sets up the value for the next Row ID.
+     * This is required for Insertion.
+     * This is used at creation of the DatabaseConnection Instance.
+     */
+    private void setupNextRowIdNumber() {
+
+        List<BlogPost> blogPosts = getAllBlogPosts();
+
+        if (blogPosts.size() == 0)
+            NEXT_ROW_ID_NUMBER = 0;
+        else
+            NEXT_ROW_ID_NUMBER = 1 + blogPosts.get(blogPosts.size() - 1).getId();
     }
 }
