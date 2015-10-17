@@ -98,7 +98,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
      *
      * @param blogPost The BlogPost to add.
      */
-    public void addBlogPost(BlogPost blogPost) {
+    public synchronized void addBlogPost(BlogPost blogPost) {
 
         // Abandon if new BlogPost is a duplicate.
         if (isBlogPostInDatabase(blogPost)) return;
@@ -119,7 +119,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
      *
      * @return All the BlogPosts in the Database.
      */
-    public List<BlogPost> getAllBlogPosts() {
+    public synchronized List<BlogPost> getAllBlogPosts() {
 
         List<BlogPost> blogPosts = new ArrayList<>();
 
@@ -148,7 +148,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
      * @param id The Id of the BlogPost to search the Database for.
      * @return The BlogPost corresponding to the Id
      */
-    public BlogPost getBlogPost(int id) {
+    public synchronized BlogPost getBlogPost(int id) {
 
         BlogPost blogPost = null;
 
@@ -177,7 +177,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
      *
      * @param updatedBlogPost The BlogPost to update.
      */
-    public void updateBlogPost(BlogPost updatedBlogPost) {
+    public synchronized void updateBlogPost(BlogPost updatedBlogPost) {
 
         SQLiteDatabase database = getWritableDatabase();
 
@@ -199,7 +199,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
      *
      * @param blogPostToDelete The BlogPost to delete.
      */
-    public void deleteBlogPost(BlogPost blogPostToDelete) {
+    public synchronized void deleteBlogPost(BlogPost blogPostToDelete) {
 
         // If the Id is not set, discover the ID;
         if (blogPostToDelete.getId() == -1) {
@@ -224,7 +224,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
      *
      * @return The number of BlogPosts in the database.
      */
-    public int getBlogPostsCount() {
+    public synchronized int getBlogPostsCount() {
 
         String[] columns = new String[]{KEY_ID};
 
@@ -246,7 +246,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
      * @return True, if the BlogPost is in the database.
      * False, if the BlogPost is not in the database.
      */
-    public boolean isBlogPostInDatabase(BlogPost blogPost) {
+    public synchronized boolean isBlogPostInDatabase(BlogPost blogPost) {
 
         List<BlogPost> blogPosts = getAllBlogPosts();
 
@@ -266,7 +266,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
      * @return The Row Id of the BlogPost, if it exists.
      * -1, if the BlogPost does not exist.
      */
-    public int findBlogPostRowId(BlogPost blogPost) {
+    public synchronized int findBlogPostRowId(BlogPost blogPost) {
 
         List<BlogPost> blogPosts = getAllBlogPosts();
 
@@ -283,7 +283,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
      * This is required for Insertion.
      * This is used at creation of the DatabaseConnection Instance.
      */
-    private void setupNextRowIdNumber() {
+    private synchronized void setupNextRowIdNumber() {
 
         List<BlogPost> blogPosts = getAllBlogPosts();
 
