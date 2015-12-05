@@ -13,7 +13,7 @@ package com.lukepotter.androiddatabasetutorialbasic.model;
  */
 public class BlogPost {
 
-    private int id;
+    private long id;
     private String title;
 
     /**
@@ -37,7 +37,7 @@ public class BlogPost {
      * @param id The ID number of the BlogPost in the Database
      * @param title The Title of the BlogPost
      */
-    public BlogPost(int id, String title) {
+    public BlogPost(long id, String title) {
 
         setId(id);
         setTitle(title);
@@ -46,11 +46,11 @@ public class BlogPost {
     /**
      * Getters and Setters
      */
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

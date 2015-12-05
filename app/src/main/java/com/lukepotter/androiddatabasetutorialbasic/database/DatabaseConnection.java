@@ -36,7 +36,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
     // Singleton Instance.
     private static DatabaseConnection ourInstance;
     // The ID of the next row number, used for Insertions.
-    private static int NEXT_ROW_ID_NUMBER;
+    private static long NEXT_ROW_ID_NUMBER;
 
     /**
      * Simple Constructor for Database Connection
@@ -129,7 +129,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 blogPosts.add(new BlogPost(
-                        Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID))),
+                        cursor.getLong(cursor.getColumnIndex(KEY_ID)),
                         cursor.getString(cursor.getColumnIndex(KEY_TITLE))));
             } while (cursor.moveToNext());
         }
@@ -162,7 +162,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
 
         if (cursor.moveToFirst()) {
             blogPost = new BlogPost(
-                    Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID))),
+                    cursor.getLong(cursor.getColumnIndex(KEY_ID)),
                     cursor.getString(cursor.getColumnIndex(KEY_TITLE)));
         }
 
@@ -203,7 +203,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
 
         // If the Id is not set, discover the ID;
         if (blogPostToDelete.getId() == -1) {
-            int blogPostId = findBlogPostRowId(blogPostToDelete);
+            long blogPostId = findBlogPostRowId(blogPostToDelete);
 
             if (blogPostId == -1) return; // Exit deletion process, as BlogPost is not in Database.
             else blogPostToDelete.setId(blogPostId); // Continue with deletion of existing BlogPost.
@@ -246,7 +246,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
      * @return True, if the BlogPost is in the database.
      * False, if the BlogPost is not in the database.
      */
-    public synchronized boolean isBlogPostInDatabase(BlogPost blogPost) {
+    private synchronized boolean isBlogPostInDatabase(BlogPost blogPost) {
 
         List<BlogPost> blogPosts = getAllBlogPosts();
 
@@ -266,7 +266,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
      * @return The Row Id of the BlogPost, if it exists.
      * -1, if the BlogPost does not exist.
      */
-    public synchronized int findBlogPostRowId(BlogPost blogPost) {
+    private synchronized long findBlogPostRowId(BlogPost blogPost) {
 
         List<BlogPost> blogPosts = getAllBlogPosts();
 
@@ -285,11 +285,34 @@ public class DatabaseConnection extends SQLiteOpenHelper {
      */
     private synchronized void setupNextRowIdNumber() {
 
-        List<BlogPost> blogPosts = getAllBlogPosts();
+        Long maxBlogPostId = determineMaxBlogPostId();
 
-        if (blogPosts.size() == 0)
+        if (maxBlogPostId == 0)
             NEXT_ROW_ID_NUMBER = 0;
         else
-            NEXT_ROW_ID_NUMBER = 1 + blogPosts.get(blogPosts.size() - 1).getId();
+            NEXT_ROW_ID_NUMBER = ++maxBlogPostId;
+    }
+
+    /**
+     * Determines the largest value of the ID column for the BlogPosts table.
+     *
+     * @return The maximum value of the ID columm in the BlogPosts table.
+     */
+    private Long determineMaxBlogPostId() {
+
+        long maxBlogPostId = 0;
+
+        String[] columns = new String[]{"MAX(" + KEY_ID + ")"};
+
+        SQLiteDatabase database = getReadableDatabase();
+        Cursor cursor = database.query(
+                TABLE_BLOGPOSTS, columns, null, null, null, null, null, null);
+
+        if (cursor.moveToFirst()) maxBlogPostId = cursor.getLong(0);
+
+        cursor.close();
+        database.close();
+
+        return maxBlogPostId;
     }
 }
