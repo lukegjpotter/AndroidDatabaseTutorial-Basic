@@ -4,8 +4,6 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.ListView;
 
-import com.lukepotter.androiddatabasetutorialbasic.BlogPostsListArrayAdapter;
-import com.lukepotter.androiddatabasetutorialbasic.R;
 import com.lukepotter.androiddatabasetutorialbasic.database.DatabaseConnection;
 import com.lukepotter.androiddatabasetutorialbasic.model.BlogPost;
 

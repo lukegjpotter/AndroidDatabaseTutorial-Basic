@@ -1,4 +1,4 @@
-package com.lukepotter.androiddatabasetutorialbasic;
+package com.lukepotter.androiddatabasetutorialbasic.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
