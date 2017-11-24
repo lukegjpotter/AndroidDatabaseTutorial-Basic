@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.ListView;
 
+import com.lukepotter.androiddatabasetutorialbasic.R;
 import com.lukepotter.androiddatabasetutorialbasic.database.DatabaseConnection;
 import com.lukepotter.androiddatabasetutorialbasic.model.BlogPost;
 
@@ -23,10 +24,9 @@ import java.util.List;
  */
 public class LoadBlogPostListViewTask extends AsyncTask<Void, Void, Void> {
 
-    List<BlogPost> blogPosts;
-    DatabaseConnection databaseConnection;
-    Context context;
-    ListView blogPostsListView;
+    private List<BlogPost> blogPosts;
+    private Context context;
+    private ListView blogPostsListView;
 
     public LoadBlogPostListViewTask(Context applicationContext, ListView blogPostsListView) {
 
@@ -37,7 +37,7 @@ public class LoadBlogPostListViewTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... params) {
 
-        databaseConnection = DatabaseConnection.getInstance(context);
+        DatabaseConnection databaseConnection = DatabaseConnection.getInstance(context);
         blogPosts = databaseConnection.getAllBlogPosts();
 
         return null;

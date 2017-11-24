@@ -26,11 +26,11 @@ import java.util.List;
  */
 public class BlogPostsListArrayAdapter extends ArrayAdapter<BlogPost> {
 
-    Context context;
-    int layoutResourceId;
-    List<BlogPost> blogPosts;
+    private Context context;
+    private int layoutResourceId;
+    private List<BlogPost> blogPosts;
 
-    public BlogPostsListArrayAdapter(Context context, int layoutResourceId, List<BlogPost> blogPosts) {
+    BlogPostsListArrayAdapter(Context context, int layoutResourceId, List<BlogPost> blogPosts) {
         super(context, layoutResourceId, blogPosts);
 
         this.context = context;
@@ -48,7 +48,7 @@ public class BlogPostsListArrayAdapter extends ArrayAdapter<BlogPost> {
             row = layoutInflater.inflate(layoutResourceId, parent, false);
 
             blogPostViewHolder = new BlogPostViewHolder();
-            blogPostViewHolder.blogPostTitle = (TextView) row.findViewById(R.id.row_blog_post_title);
+            blogPostViewHolder.blogPostTitle = row.findViewById(R.id.row_blog_post_title);
 
             row.setTag(blogPostViewHolder);
         } else {

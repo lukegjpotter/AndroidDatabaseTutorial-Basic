@@ -15,7 +15,6 @@ import com.lukepotter.androiddatabasetutorialbasic.task.LoadBlogPostListViewTask
 public class MainActivity extends Activity {
 
     private EditText editText;
-    private Button addButton, deleteButton;
     private ListView blogPostsListView;
     /**
      * The OnClickListener to add a BlogPost to the database.
@@ -76,15 +75,15 @@ public class MainActivity extends Activity {
 
     private void setupUiResources() {
 
-        editText = (EditText) findViewById(R.id.editText);
+        editText = findViewById(R.id.editText);
 
-        addButton = (Button) findViewById(R.id.addButton);
+        Button addButton = findViewById(R.id.addButton);
         addButton.setOnClickListener(addBlogPostOnClickListener);
 
-        deleteButton = (Button) findViewById(R.id.deleteButton);
+        Button deleteButton = findViewById(R.id.deleteButton);
         deleteButton.setOnClickListener(deleteBlogPostOnClickListener);
 
-        blogPostsListView = (ListView) findViewById(R.id.blogPostListView);
+        blogPostsListView = findViewById(R.id.blogPostListView);
         refreshBlogPostsListView();
     }
 
